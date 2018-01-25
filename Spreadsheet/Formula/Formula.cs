@@ -1,7 +1,9 @@
 ﻿// Skeleton written by Joe Zachary for CS 3500, January 2017
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Formulas
@@ -15,6 +17,12 @@ namespace Formulas
     /// </summary>
     public class Formula
     {
+        //instance variables
+        private string[] stringFormula;
+        
+        
+
+
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -38,6 +46,114 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            //get tokens
+            IEnumerable<string> tokens = Formula.GetTokens(formula);
+
+            //valid token patterns
+            String opPattern = @"^[\+\-*/]$";
+            Regex operation = new Regex(opPattern);
+            String varPattern = @"^[a-zA-Z][0-9a-zA-Z]*$";
+            Regex variable = new Regex(varPattern);
+            String spacePattern = @"^\s+$";
+            Regex space = new Regex(spacePattern);
+
+            //counters
+            int opening = 0;
+            int closing = 0;
+            String previous = null;
+
+            //check if the formua meets the syntactic standards
+            foreach ( string element in tokens)
+            {
+                
+                //check if there is at least one token
+                if(element == null)
+                {
+                    throw new FormulaFormatException("No tokens");
+                }
+
+                double number;
+                //check for all valid tokens
+                if (!(element.Equals("(") || element.Equals(")") || operation.IsMatch(element) || variable.IsMatch(element) || Double.TryParse(element, out number) || space.IsMatch(element)))
+                {
+                    throw new FormulaFormatException("Invalid Tokens");
+                }
+
+                //check if the number of closing parathensis is ever greater than the number of openeing parathensis
+               if(element.Equals("("))
+                {
+                    opening++;
+                }
+
+                if (element.Equals(")"))
+                {
+                    closing++;
+                }
+
+                if(closing > opening)
+                {
+                    throw new FormulaFormatException("More closing than opening");
+                }
+
+                if(element == tokens.Last())
+                {
+                    //check if The total number of opening parentheses must equal the total number of closing parentheses.
+                    if (opening != closing)
+                    {
+                        throw new FormulaFormatException("closing and opening do not equal");
+
+                    }
+                }
+
+                //check if The first token of a formula must be a number, a variable, or an opening parenthesis.
+
+                if (!(tokens.First().Equals("(") || variable.IsMatch(tokens.First()) || Double.TryParse(tokens.First(), out number)))
+                {
+                    throw new FormulaFormatException("First token was not a number, variable, or opening parenthesis");
+                }
+
+                //check if Any token that immediately follows an opening parenthesis or an operator must be either a number,
+                //a variable, or an opening parenthesis.
+                if (previous != null)
+                {
+                    if (previous.Equals("(") || operation.IsMatch(previous))
+                    {
+                        if (!(variable.IsMatch(element) || Double.TryParse(element, out number) || element.Equals("(")))
+                        {
+                            throw new FormulaFormatException("token immediatly following an open parethesis or operater was not a number, variable, or open parenthesis");
+                        }
+                    }
+
+                    //check if Any token that immediately follows a number, a variable, or a closing parenthesis must be either 
+                    //an operator or a closing parenthesis.
+
+                    if (Double.TryParse(previous, out number)|| variable.IsMatch(previous) || previous.Equals(")"))
+                    {
+                        if (!(operation.IsMatch(element) || element.Equals(")")))
+                        {
+                            throw new FormulaFormatException("The token immediatlely folloeing a number, varibale, or colsing parenthesis was not either an operator or closing parethesis");
+                        }
+                    }
+                }
+                //change the previous reference
+                previous = element;
+            }
+            
+            
+            //if all syntactical arrors pass then put the tokens in a string array to be accessed by other methods
+            int stringCounter = 0;
+            stringFormula = new String[tokens.Count()];
+            foreach (string element in tokens)
+            {
+                stringFormula[stringCounter] = element;
+                stringCounter++;
+            }
+
+
+
+
+
+
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
@@ -50,8 +166,238 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
-            return 0;
-        }
+            //two empty stacks
+            Stack<double> values = new Stack<double>();
+            Stack<String> operators = new Stack<String>();
+
+
+            
+            for (int i = 0; i < stringFormula.Length; i++)
+            {
+                String t = stringFormula[i];
+                double number; 
+
+                    //check if t is a double
+                    if (Double.TryParse(t, out number)) // if it is parsable, will return true
+                    {
+                        double token = number; // number will hold the token value as a double
+
+                        String top;
+                    if (operators.Count > 0 && values.Count > 0)
+                    {
+                        top = operators.Peek();
+
+                        if (top.Equals("*") || top.Equals("/"))
+                        {
+                            double first_val = values.Pop();
+                            String operation = operators.Pop();
+                            double result;
+                            if (operation.Equals("*"))
+                                result = first_val * token;
+                            else
+                            {
+                                if (token == 0)
+                                    throw new FormatException();
+                                result = first_val / token;
+                            }
+                            values.Push(result);
+                        }
+
+                        else
+                        {
+                            values.Push(token);
+                        }
+                    }
+                    else
+                    {
+                        values.Push(token);
+                    }
+                    }
+
+                    //check if t is a + or -
+                    else if(t.Equals("+") || t.Equals("-"))
+                    {
+                    if (operators.Count > 0 && values.Count > 0 && (operators.Peek().Equals("-") || operators.Peek().Equals("+")))
+                    {
+                        
+                        
+
+                            double value1 = values.Pop();
+                            double value2 = values.Pop();
+
+                            String topOp = operators.Pop();
+
+                            double result;
+                            if (topOp.Equals("+"))
+                            {
+                                result = value1 + value2;
+                                values.Push(result);
+                            }
+
+    
+
+                            else
+                            {
+                                result = value1 - value2;
+                                values.Push(result);
+                            }
+
+
+                        
+                    }
+
+                    else
+                    {
+                        operators.Push(t);
+                    }
+                    }
+
+                    //if t is * or /
+                    else if(t.Equals("/") || t.Equals("*"))
+                    {
+                        operators.Push(t);
+                    }
+
+                    //if t is (
+                    else if (t.Equals("("))
+                    {
+                        operators.Push(t);
+                    }
+
+                    //if t is )
+                    else if(t.Equals(")"))
+                    {
+                        if(operators.Count > 0 && values.Count > 0)
+                        {
+                            if(operators.Peek().Equals("+") || operators.Peek().Equals("-"))
+                            {
+                                double value1 = values.Pop();
+                                double value2 = values.Pop();
+                                string topOp = operators.Pop();
+
+                            double result;
+                            if (topOp.Equals("+"))
+                            {
+                                result = value1 + value2;
+                                values.Push(result);
+                            }
+
+                            
+
+                            else
+                            {
+                                result = value1 - value2;
+                                values.Push(result);
+                            }
+
+                            }
+                        }
+
+                        String para = operators.Pop();
+                    if (operators.Count() != 0)
+                    {
+                        if (operators.Peek().Equals("*") || operators.Peek().Equals("/"))
+                        {
+                            double value1 = values.Pop();
+                            double value2 = values.Pop();
+                            string topOp = operators.Pop();
+
+                            double result;
+
+
+                            if (topOp.Equals("*"))
+                            {
+                                result = value1 * value2;
+                                values.Push(result);
+                            }
+
+                            else
+                            {
+                                if (value2 == 0)
+                                {
+                                    throw new FormatException();
+                                }
+                                result = value1 / value2;
+                                values.Push(result);
+                            }
+
+           
+
+                        }
+                    }
+                }
+
+                //if t is a variable
+                else
+                {
+                    double token;
+                    try
+                    {
+                        token = lookup(t); // number will hold the token value as a double
+
+                    }
+
+                    catch (UndefinedVariableException)
+                    {
+                        throw new FormulaEvaluationException("Could not define Variable");
+                    }
+
+
+                    String top;
+                    if (operators.Count > 0 && values.Count > 0)
+                    {
+                        top = operators.Peek();
+
+                        if (top.Equals("*") || top.Equals("/"))
+                        {
+                            double first_val = values.Pop();
+                            String operation = operators.Pop();
+                            double result;
+                            if (operation.Equals("*"))
+                                result = first_val * token;
+                            else
+                            {
+                                if (token == 0)
+                                    throw new FormatException();
+                                result = first_val / token;
+                            }
+                            values.Push(result);
+                        }
+                        else
+                        {
+                            values.Push(token);
+                        }
+                    }
+                    else
+                        values.Push(token);
+                }
+            }
+
+            //return a value
+            if(operators.Count() == 0)
+            {
+               return values.Pop();
+            }
+            else
+            {
+                double value1 = values.Pop();
+                double value2 = values.Pop();
+
+                if(operators.Pop() == "+")
+                {
+                    return value1 + value2; 
+                }
+
+                else
+                {
+                    return value1 - value2;
+                }
+            }
+                
+            }
+
+            
+        
 
         /// <summary>
         /// Given a formula, enumerates the tokens that compose it.  Tokens are left paren,
@@ -68,7 +414,7 @@ namespace Formulas
             // the opPattern will match "+" but not "abc+def", you need to add ^ to the beginning of the pattern
             // and $ to the end (e.g., opPattern would need to be @"^[\+\-*/]$".)
             String lpPattern = @"\(";
-            String rpPattern = @"\)";
+            String rpPattern = @"\)IEnumerable<string>";
             String opPattern = @"[\+\-*/]";
             String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
 
@@ -152,3 +498,5 @@ namespace Formulas
         }
     }
 }
+
+
