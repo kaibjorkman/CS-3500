@@ -48,11 +48,28 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
+        //Instance Variables
+
+        //Map a dependent to all its dependees
+        private Dictionary<string, HashSet<string>> dependentsMap;
+
+        //Map a dependee to all of its dependents
+        private Dictionary<string, HashSet<string>> dependeesMap;
+
+        //size counter;
+        int graphSize;
+
+
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            dependentsMap = new Dictionary<string, HashSet<string>>();
+            dependeesMap = new Dictionary<string, HashSet<string>>();
+
+            graphSize = 0;
+
         }
 
         /// <summary>
@@ -60,23 +77,47 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return graphSize; }
         }
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
         /// </summary>
-        public bool HasDependents(string s)
+        public bool HasDependees(string s)
         {
-            return false;
+            //if the dependents has the key "s"
+            if (dependentsMap.ContainsKey(s))
+            {
+                if (dependentsMap[s].Count != 0)
+                {
+                    return true;
+                }
+
+                return false;
+
+            }
+            else
+                return false;
         }
 
         /// <summary>
         /// Reports whether dependees(s) is non-empty.  Requires s != null.
         /// </summary>
-        public bool HasDependees(string s)
+        public bool HasDependents(string s)
         {
-            return false;
+            //if the dependees has the key "s"
+            if (dependeesMap.ContainsKey(s))
+            {
+                if (dependeesMap[s].Count != 0)
+                {
+                    return true;
+                }
+
+                return false;
+
+            }
+            else
+                return false;
         }
 
         /// <summary>
@@ -84,7 +125,15 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            //if the dependees has the key "s" return the set of dependents
+            if (dependeesMap.ContainsKey(s))
+            {
+                return new HashSet<string>(dependeesMap[s]);
+            }
+
+            else
+                //if not return an empty string
+                return new HashSet<string>();
         }
 
         /// <summary>
@@ -92,7 +141,15 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            //if the dependents has the key "s" return the set of dependees
+            if (dependentsMap.ContainsKey(s))
+            {
+                return new HashSet<string>(dependentsMap[s]);
+            }
+
+            else
+                //if not retrun an empty string
+                return new HashSet<string>();
         }
 
         /// <summary>
@@ -102,6 +159,49 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            //check if the dependency pair exists
+            if(!(dependentsMap.ContainsKey(s) && dependeesMap.ContainsKey(t)))
+            {
+                graphSize++;
+            }
+
+            //check if "s" is in the dependents already
+
+            if(dependentsMap.ContainsKey(s))
+            {
+                //add t to its dependees set
+                dependentsMap[s].Add(t);
+            }
+
+            else //else add s to dependents and t as a dependee of s
+            {
+                //create a new HashSet of dependees for s
+                HashSet<string> dependees = new HashSet<string>();
+
+                dependees.Add(t);
+                dependentsMap.Add(s, dependees);
+            }
+
+            //check if "t" is in the dependees already
+
+            if (dependeesMap.ContainsKey(t))
+            {
+                //add s to its dependents set
+                dependeesMap[t].Add(s);
+            }
+
+            else //else add s to dependents and t as a dependee of s
+            {
+                //create a new HashSet of dependents for t
+                HashSet<string> dependents = new HashSet<string>();
+
+                dependents.Add(s);
+                dependeesMap.Add(t, dependents);
+            }
+
+
+
+
         }
 
         /// <summary>
@@ -111,6 +211,27 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            //check if this pair exists yet
+            if(dependentsMap.ContainsKey(s) && dependeesMap.ContainsKey(t))
+            {
+                graphSize--;
+            }
+
+            //check if s is contained in dependents
+            if(dependentsMap.ContainsKey(s))
+            {
+                dependentsMap[s].Remove(t);
+
+               
+            }
+
+            //check if t is contained in dependees
+            if (dependeesMap.ContainsKey(t))
+            {
+                dependeesMap[t].Remove(s);
+
+                
+            }
         }
 
         /// <summary>
@@ -120,6 +241,16 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            // new IEnumerable object to hold the old dependents of 's'  
+            IEnumerable<string> oldDependents = GetDependents(s);
+
+            // remove each dependent 'r' associated with 's' in the set of oldDependents
+            foreach (string r in oldDependents)
+                RemoveDependency(s, r); // remove the ordered pair           
+
+            // add each dependent 't' associated with 's' in the set of NewDependents
+            foreach (string t in newDependents)
+                AddDependency(s, t);
         }
 
         /// <summary>
@@ -129,6 +260,16 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            // new IEnumerable object to hold the old dependees of 's'  
+            IEnumerable<string> oldDependees = GetDependees(t);
+
+            // remove each dependee 'r' associated with 's' in the set of oldDependees
+            foreach (string r in oldDependees)
+                RemoveDependency(t, r); // remove the ordered pair           
+
+            // add each dependee 't' associated with 's' in the set of NewDependees
+            foreach (string s in newDependees)
+                AddDependency(t, s);
         }
     }
 }
