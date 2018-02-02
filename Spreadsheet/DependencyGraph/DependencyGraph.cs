@@ -222,6 +222,11 @@ namespace Dependencies
             {
                 dependentsMap[s].Remove(t);
 
+                if(dependentsMap[s].Count == 0)
+                {
+                    dependentsMap.Remove(s);
+                }
+
                
             }
 
@@ -230,7 +235,10 @@ namespace Dependencies
             {
                 dependeesMap[t].Remove(s);
 
-                
+               if(dependeesMap[t].Count == 0)
+                {
+                    dependeesMap.Remove(t);
+                }
             }
         }
 

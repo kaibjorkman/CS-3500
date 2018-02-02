@@ -122,15 +122,15 @@ namespace DependencyGraphTestCases
         {
             DependencyGraph test = new DependencyGraph();
 
-            for(int i = 0; i < 1_000; i++)
+            for(int i = 0; i < 100_000; i++)
             {
-                string first = RandomString(10);
-                string second = RandomString(10);
+                string first = RandomString(100);
+                string second = RandomString(100);
 
                 test.AddDependency(first, second);
             }
 
-            Assert.AreEqual(1000, test.Size);
+            Assert.AreEqual(100_000, test.Size);
         }
 
         [TestMethod]
