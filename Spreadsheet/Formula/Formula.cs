@@ -60,11 +60,19 @@ namespace Formulas
             //counters
             int opening = 0;
             int closing = 0;
+            int elementCounter = 0;
             String previous = null;
+
+            //check if the there are any tokens to check
+            if(tokens.Count<string>() == 0)
+            {
+                throw new FormulaFormatException("No tokens");
+            }
 
             //check if the formua meets the syntactic standards
             foreach ( string element in tokens)
             {
+                elementCounter++;
                 
                 //check if there is at least one token
                 if(element == null)
@@ -95,7 +103,7 @@ namespace Formulas
                     throw new FormulaFormatException("More closing than opening");
                 }
 
-                if(element == tokens.Last())
+                if(elementCounter == tokens.Count<string>())
                 {
                     //check if The total number of opening parentheses must equal the total number of closing parentheses.
                     if (opening != closing)
@@ -121,6 +129,16 @@ namespace Formulas
                         if (!(variable.IsMatch(element) || Double.TryParse(element, out number) || element.Equals("(")))
                         {
                             throw new FormulaFormatException("token immediatly following an open parethesis or operater was not a number, variable, or open parenthesis");
+                        }
+
+                        
+                    }
+
+                    if(element.Equals("(") || operation.IsMatch(element))
+                    {
+                        if(element == tokens.Last<string>())
+                        {
+                            throw new FormulaFormatException("The last element can not be an open parathesis or an operator");
                         }
                     }
 
@@ -197,7 +215,7 @@ namespace Formulas
                             else
                             {
                                 if (token == 0)
-                                    throw new FormatException();
+                                    throw new FormulaEvaluationException("You cannot divide by 0");
                                 result = first_val / token;
                             }
                             values.Push(result);
@@ -232,14 +250,16 @@ namespace Formulas
                             {
                                 result = value1 + value2;
                                 values.Push(result);
+                                operators.Push(t);
                             }
 
     
 
                             else
                             {
-                                result = value1 - value2;
+                                result = value2 - value1;
                                 values.Push(result);
+                                operators.Push(t);
                             }
 
 
@@ -286,7 +306,7 @@ namespace Formulas
 
                             else
                             {
-                                result = value1 - value2;
+                                result = value2 - value1;
                                 values.Push(result);
                             }
 
@@ -313,11 +333,11 @@ namespace Formulas
 
                             else
                             {
-                                if (value2 == 0)
+                                if (value1 == 0)
                                 {
-                                    throw new FormatException();
+                                    throw new FormulaEvaluationException("You cannot divide by 0");
                                 }
-                                result = value1 / value2;
+                                result = value2 / value1;
                                 values.Push(result);
                             }
 
@@ -390,7 +410,7 @@ namespace Formulas
 
                 else
                 {
-                    return value1 - value2;
+                    return value2 - value1;
                 }
             }
                 
