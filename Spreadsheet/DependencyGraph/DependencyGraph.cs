@@ -62,6 +62,8 @@ namespace Dependencies
 
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
+        /// 
+        /// 
         /// </summary>
         public DependencyGraph()
         {
@@ -70,6 +72,21 @@ namespace Dependencies
 
             graphSize = 0;
 
+        }
+
+        /// <summary>
+        /// Takes a dependency graph as a parameter and copies all the dependencies into its own maps.
+        /// </summary>
+        /// <param name="graph"></param>
+        public DependencyGraph(DependencyGraph graph)
+        {
+            dependentsMap = new Dictionary<string, HashSet<string>>();
+            dependeesMap = new Dictionary<string, HashSet<string>>();
+
+            graphSize = 0;
+
+            graph.dependeesMap = dependeesMap;
+            graph.dependentsMap = dependentsMap;
         }
 
         /// <summary>
@@ -82,9 +99,16 @@ namespace Dependencies
 
         /// <summary>
         /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// 
+        /// ArgumentNull exception will be thrown if string s is null
         /// </summary>
         public bool HasDependees(string s)
         {
+            if(s == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //if the dependents has the key "s"
             if (dependeesMap.ContainsKey(s))
             {
@@ -102,9 +126,16 @@ namespace Dependencies
 
         /// <summary>
         /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// 
+        /// ArgumentNullException will be thrown if parameter is null
         /// </summary>
         public bool HasDependents(string s)
         {
+            if(s == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //if the dependees has the key "s"
             if (dependentsMap.ContainsKey(s))
             {
@@ -122,9 +153,16 @@ namespace Dependencies
 
         /// <summary>
         /// Enumerates dependents(s).  Requires s != null.
+        /// 
+        /// ArgumentNullException will be thrown if string s is null
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
+            if(s == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //if the dependees has the key "s" return the set of dependents
             if (dependentsMap.ContainsKey(s))
             {
@@ -138,9 +176,16 @@ namespace Dependencies
 
         /// <summary>
         /// Enumerates dependees(s).  Requires s != null.
+        /// 
+        /// ArgumentNullException will be thrown if string s is null
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //if the dependents has the key "s" return the set of dependees
             if (dependeesMap.ContainsKey(s))
             {
@@ -156,9 +201,16 @@ namespace Dependencies
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// 
+        /// ArgumentNullExcption will be thrown if string s or string t is null
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            if(s == null || t == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //check if the dependency pair exists
             if(!(dependentsMap.ContainsKey(s) && dependeesMap.ContainsKey(t)))
             {
@@ -208,11 +260,18 @@ namespace Dependencies
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
         /// Requires s != null and t != null.
+        /// 
+        /// ArgumentNullExcption will be thrown if string s or string t is null
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            if (s == null || t == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //check if this pair exists yet
-            if(dependentsMap.ContainsKey(s) && dependeesMap.ContainsKey(t))
+            if (dependentsMap.ContainsKey(s) && dependeesMap.ContainsKey(t))
             {
                 graphSize--;
             }
@@ -227,7 +286,6 @@ namespace Dependencies
                     dependentsMap.Remove(s);
                 }
 
-               
             }
 
             //check if t is contained in dependees
@@ -246,9 +304,23 @@ namespace Dependencies
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// 
+        /// ArgumentNullException will be thrown if s is null of a string in the IEnumerable is null.
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if(s == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
+            foreach(string dependent in newDependents)
+            {
+                if(dependent == null)
+                {
+                    throw new ArgumentNullException("Parameter is Null");
+                }
+            }
             // new IEnumerable object to hold the old dependents of 's'  
             IEnumerable<string> oldDependents = GetDependents(s);
 
@@ -265,9 +337,23 @@ namespace Dependencies
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
         /// Requires s != null and t != null.
+        /// 
+        ///  ArgumentNullException will be thrown if s is null of a string in the IEnumerable is null.
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            if (t == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
+            foreach (string dependee in newDependees)
+            {
+                if (dependee == null)
+                {
+                    throw new ArgumentNullException("Parameter is Null");
+                }
+            }
             // new IEnumerable object to hold the old dependees of 's'  
             IEnumerable<string> oldDependees = GetDependees(t);
 
