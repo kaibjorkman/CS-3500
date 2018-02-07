@@ -86,9 +86,9 @@ namespace Dependencies
         public bool HasDependees(string s)
         {
             //if the dependents has the key "s"
-            if (dependentsMap.ContainsKey(s))
+            if (dependeesMap.ContainsKey(s))
             {
-                if (dependentsMap[s].Count != 0)
+                if (dependeesMap[s].Count != 0)
                 {
                     return true;
                 }
@@ -106,9 +106,9 @@ namespace Dependencies
         public bool HasDependents(string s)
         {
             //if the dependees has the key "s"
-            if (dependeesMap.ContainsKey(s))
+            if (dependentsMap.ContainsKey(s))
             {
-                if (dependeesMap[s].Count != 0)
+                if (dependentsMap[s].Count != 0)
                 {
                     return true;
                 }
@@ -126,9 +126,9 @@ namespace Dependencies
         public IEnumerable<string> GetDependents(string s)
         {
             //if the dependees has the key "s" return the set of dependents
-            if (dependeesMap.ContainsKey(s))
+            if (dependentsMap.ContainsKey(s))
             {
-                return new HashSet<string>(dependeesMap[s]);
+                return new HashSet<string>(dependentsMap[s]);
             }
 
             else
@@ -142,9 +142,9 @@ namespace Dependencies
         public IEnumerable<string> GetDependees(string s)
         {
             //if the dependents has the key "s" return the set of dependees
-            if (dependentsMap.ContainsKey(s))
+            if (dependeesMap.ContainsKey(s))
             {
-                return new HashSet<string>(dependentsMap[s]);
+                return new HashSet<string>(dependeesMap[s]);
             }
 
             else
@@ -273,11 +273,11 @@ namespace Dependencies
 
             // remove each dependee 'r' associated with 's' in the set of oldDependees
             foreach (string r in oldDependees)
-                RemoveDependency(t, r); // remove the ordered pair           
+                RemoveDependency(r, t); // remove the ordered pair           
 
             // add each dependee 't' associated with 's' in the set of NewDependees
             foreach (string s in newDependees)
-                AddDependency(t, s);
+                AddDependency(s, t);
         }
     }
 }
