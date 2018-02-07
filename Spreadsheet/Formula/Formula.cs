@@ -416,8 +416,8 @@ namespace Formulas
                 
             }
 
-            
-        
+
+
 
         /// <summary>
         /// Given a formula, enumerates the tokens that compose it.  Tokens are left paren,
@@ -434,7 +434,7 @@ namespace Formulas
             // the opPattern will match "+" but not "abc+def", you need to add ^ to the beginning of the pattern
             // and $ to the end (e.g., opPattern would need to be @"^[\+\-*/]$".)
             String lpPattern = @"\(";
-            String rpPattern = @"\)IEnumerable<string>";
+            String rpPattern = @"\)";
             String opPattern = @"[\+\-*/]";
             String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
 
