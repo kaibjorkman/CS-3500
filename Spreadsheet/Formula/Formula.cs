@@ -477,7 +477,7 @@ namespace Formulas
         /// Returns an ISet<string> that contains each distinct variable (in normalized form) that appears in the Formula.
         /// </summary>
         /// <returns></returns>
-        private ISet<string> GetVariables()
+        public ISet<string> GetVariables()
         {
             HashSet<string> normalSet = new HashSet<string>(normalized_vars);
             return normalSet;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Formulas
@@ -367,5 +368,81 @@ namespace Formulas
         {
             Test41();
         }
+        /// <summary>
+        /// tests the null pointer exception inside the formula constructor
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Test46()
+        {
+            String formula = null;
+            Formula f = new Formula(formula, s => s, s => true);
+        }
+
+        /// <summary>
+        /// tests the exception thrwon by the validator
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Test47()
+        {
+            String formula = "x + 2";
+            Formula f = new Formula(formula, s => s, s => false);
+        }
+
+        /// <summary>
+        /// tests the null pointer exception inside evlauate
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Test48()
+        {
+            String formula = "x + 2";
+            Formula f = new Formula(formula, s => s, s => true);
+            f.Evaluate(null);
+        }
+
+        /// <summary>
+        /// tests the null pointer exception inside the formula constructor
+        /// </summary>
+        [TestMethod()]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Test49()
+        {
+            String formula = null;
+            Formula f = new Formula(formula);
+        }
+
+        /// <summary>
+        /// tests the null pointer exception inside the formula constructor
+        /// </summary>
+        [TestMethod()]
+        
+        public void Test50()
+        {
+            String formula = "x + 2";
+            String expected = "x+2";
+            Formula f = new Formula(formula, s => s, s => true);
+            Assert.AreEqual(expected, f.ToString()); 
+        }
+
+        /// <summary>
+        /// tests the null pointer exception inside the formula constructor
+        /// </summary>
+        [TestMethod()]
+        
+        public void Test51()
+        {
+            String formula = "x + 2";
+            Formula f = new Formula(formula, s => s, s => true);
+            ISet<string> hey = f.GetVariables();
+
+            foreach(string variable in hey)
+            {
+                Assert.AreEqual(variable, "x");
+            }
+        }
+
+
     }
 }
