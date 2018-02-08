@@ -15,14 +15,32 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
     {
         //instance variables
         private string[] stringFormula;
-        
-        
 
 
+        // variable to keep track of normalized variables
+        private HashSet<string> normalized_vars;
+
+        /// <summary>
+        /// Creates a Formula from a string that consists of an infix expression written as
+        /// described in the class comment.  If the expression is syntactically invalid,
+        /// throws a FormulaFormatException with an explanatory Message.
+        /// 
+        /// An Argument Null Exception will be thrown if string parameter is null
+        /// 
+        /// The associated normalizer is the identity function, and the associated validator
+        /// maps every string to true.  
+        /// </summary>       
+        public Formula(String formula) : this(formula, s => s, s => true)
+        {
+            if (formula == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+        }
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -43,9 +61,16 @@ namespace Formulas
         /// 
         /// If the formula is syntacticaly invalid, throws a FormulaFormatException with an 
         /// explanatory Message.
+        /// 
+        /// An ArgumentNullException is thrown if string is null.
         /// </summary>
-        public Formula(String formula)
+        public Formula(String formula, Normalizer n, Validator v)
         {
+            if (formula == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //get tokens
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
@@ -63,22 +88,27 @@ namespace Formulas
             int elementCounter = 0;
             String previous = null;
 
+            //keep track of normalized variables
+
+            normalized_vars = new HashSet<string>();
+
             //check if the there are any tokens to check
-            if(tokens.Count<string>() == 0)
+            if (tokens.Count<string>() == 0)
             {
                 throw new FormulaFormatException("No tokens");
             }
 
             //check if the formua meets the syntactic standards
-            foreach ( string element in tokens)
+            foreach (string element in tokens)
             {
                 elementCounter++;
-                
+
                 //check if there is at least one token
-                if(element == null)
+                if (element == null)
                 {
                     throw new FormulaFormatException("No tokens");
                 }
+
 
                 double number;
                 //check for all valid tokens
@@ -88,7 +118,7 @@ namespace Formulas
                 }
 
                 //check if the number of closing parathensis is ever greater than the number of openeing parathensis
-               if(element.Equals("("))
+                if (element.Equals("("))
                 {
                     opening++;
                 }
@@ -98,12 +128,12 @@ namespace Formulas
                     closing++;
                 }
 
-                if(closing > opening)
+                if (closing > opening)
                 {
                     throw new FormulaFormatException("More closing than opening");
                 }
 
-                if(elementCounter == tokens.Count<string>())
+                if (elementCounter == tokens.Count<string>())
                 {
                     //check if The total number of opening parentheses must equal the total number of closing parentheses.
                     if (opening != closing)
@@ -131,12 +161,12 @@ namespace Formulas
                             throw new FormulaFormatException("token immediatly following an open parethesis or operater was not a number, variable, or open parenthesis");
                         }
 
-                        
+
                     }
 
-                    if(element.Equals("(") || operation.IsMatch(element))
+                    if (element.Equals("(") || operation.IsMatch(element))
                     {
-                        if(element == tokens.Last<string>())
+                        if (element == tokens.Last<string>())
                         {
                             throw new FormulaFormatException("The last element can not be an open parathesis or an operator");
                         }
@@ -145,7 +175,7 @@ namespace Formulas
                     //check if Any token that immediately follows a number, a variable, or a closing parenthesis must be either 
                     //an operator or a closing parenthesis.
 
-                    if (Double.TryParse(previous, out number)|| variable.IsMatch(previous) || previous.Equals(")"))
+                    if (Double.TryParse(previous, out number) || variable.IsMatch(previous) || previous.Equals(")"))
                     {
                         if (!(operation.IsMatch(element) || element.Equals(")")))
                         {
@@ -156,13 +186,33 @@ namespace Formulas
                 //change the previous reference
                 previous = element;
             }
-            
-            
+
+
             //if all syntactical arrors pass then put the tokens in a string array to be accessed by other methods
             int stringCounter = 0;
             stringFormula = new String[tokens.Count()];
             foreach (string element in tokens)
             {
+                //check if the element is a variable
+                if (variable.IsMatch(element))
+                {
+                    if (!(variable.IsMatch(n.Invoke(element))))
+                    {
+                        throw new FormulaFormatException("normalized variable could not be recognized as a variable");
+                    }
+
+                    if (!(v.Invoke(n.Invoke(element))))
+                    {
+                        throw new FormulaFormatException("the normalized varible was not valid");
+                    }
+
+                    //add the normalized variable to the array
+
+                    stringFormula[stringCounter] = n.Invoke(element);
+
+                    //keep track of the normalized variables
+                    normalized_vars.Add(n.Invoke(element));
+                }
                 stringFormula[stringCounter] = element;
                 stringCounter++;
             }
@@ -181,26 +231,33 @@ namespace Formulas
         /// If no undefined variables or divisions by zero are encountered when evaluating 
         /// this Formula, its value is returned.  Otherwise, throws a FormulaEvaluationException  
         /// with an explanatory Message.
+        /// 
+        /// if the lookup object is null an ArgumentNUllException will be thrown
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            if (lookup == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+
             //two empty stacks
             Stack<double> values = new Stack<double>();
             Stack<String> operators = new Stack<String>();
 
 
-            
+
             for (int i = 0; i < stringFormula.Length; i++)
             {
                 String t = stringFormula[i];
-                double number; 
+                double number;
 
-                    //check if t is a double
-                    if (Double.TryParse(t, out number)) // if it is parsable, will return true
-                    {
-                        double token = number; // number will hold the token value as a double
+                //check if t is a double
+                if (Double.TryParse(t, out number)) // if it is parsable, will return true
+                {
+                    double token = number; // number will hold the token value as a double
 
-                        String top;
+                    String top;
                     if (operators.Count > 0 && values.Count > 0)
                     {
                         top = operators.Peek();
@@ -230,70 +287,70 @@ namespace Formulas
                     {
                         values.Push(token);
                     }
-                    }
+                }
 
-                    //check if t is a + or -
-                    else if(t.Equals("+") || t.Equals("-"))
-                    {
+                //check if t is a + or -
+                else if (t.Equals("+") || t.Equals("-"))
+                {
                     if (operators.Count > 0 && values.Count > 0 && (operators.Peek().Equals("-") || operators.Peek().Equals("+")))
                     {
-                        
-                        
-
-                            double value1 = values.Pop();
-                            double value2 = values.Pop();
-
-                            String topOp = operators.Pop();
-
-                            double result;
-                            if (topOp.Equals("+"))
-                            {
-                                result = value1 + value2;
-                                values.Push(result);
-                                operators.Push(t);
-                            }
-
-    
-
-                            else
-                            {
-                                result = value2 - value1;
-                                values.Push(result);
-                                operators.Push(t);
-                            }
 
 
-                        
+
+                        double value1 = values.Pop();
+                        double value2 = values.Pop();
+
+                        String topOp = operators.Pop();
+
+                        double result;
+                        if (topOp.Equals("+"))
+                        {
+                            result = value1 + value2;
+                            values.Push(result);
+                            operators.Push(t);
+                        }
+
+
+
+                        else
+                        {
+                            result = value2 - value1;
+                            values.Push(result);
+                            operators.Push(t);
+                        }
+
+
+
                     }
 
                     else
                     {
                         operators.Push(t);
                     }
-                    }
+                }
 
-                    //if t is * or /
-                    else if(t.Equals("/") || t.Equals("*"))
-                    {
-                        operators.Push(t);
-                    }
+                //if t is * or /
+                else if (t.Equals("/") || t.Equals("*"))
+                {
+                    operators.Push(t);
+                }
 
-                    //if t is (
-                    else if (t.Equals("("))
-                    {
-                        operators.Push(t);
-                    }
+                //if t is (
+                else if (t.Equals("("))
+                {
+                    operators.Push(t);
+                }
 
-                    //if t is )
-                    else if(t.Equals(")"))
+                //if t is )
+                else if (t.Equals(")"))
+                {
+                    if (operators.Count > 0 && values.Count > 0)
                     {
-                        if(operators.Count > 0 && values.Count > 0)
+                        if (operators.Peek().Equals("+") || operators.Peek().Equals("-"))
                         {
-                            if(operators.Peek().Equals("+") || operators.Peek().Equals("-"))
-                            {
-                                double value1 = values.Pop();
-                                double value2 = values.Pop();
-                                string topOp = operators.Pop();
+                            double value1 = values.Pop();
+                            double value2 = values.Pop();
+                            string topOp = operators.Pop();
 
                             double result;
                             if (topOp.Equals("+"))
@@ -302,7 +359,7 @@ namespace Formulas
                                 values.Push(result);
                             }
 
-                            
+
 
                             else
                             {
@@ -310,10 +367,10 @@ namespace Formulas
                                 values.Push(result);
                             }
 
-                            }
                         }
+                    }
 
-                        String para = operators.Pop();
+                    String para = operators.Pop();
                     if (operators.Count() != 0)
                     {
                         if (operators.Peek().Equals("*") || operators.Peek().Equals("/"))
@@ -341,7 +398,7 @@ namespace Formulas
                                 values.Push(result);
                             }
 
-           
+
 
                         }
                     }
@@ -394,18 +451,18 @@ namespace Formulas
             }
 
             //return a value
-            if(operators.Count() == 0)
+            if (operators.Count() == 0)
             {
-               return values.Pop();
+                return values.Pop();
             }
             else
             {
                 double value1 = values.Pop();
                 double value2 = values.Pop();
 
-                if(operators.Pop() == "+")
+                if (operators.Pop() == "+")
                 {
-                    return value1 + value2; 
+                    return value1 + value2;
                 }
 
                 else
@@ -413,10 +470,39 @@ namespace Formulas
                     return value2 - value1;
                 }
             }
-                
+
+        }
+
+        /// <summary>
+        /// Returns an ISet<string> that contains each distinct variable (in normalized form) that appears in the Formula.
+        /// </summary>
+        /// <returns></returns>
+        public ISet<string> GetVariables()
+        {
+            HashSet<string> normalSet = new HashSet<string>(normalized_vars);
+            return normalSet;
+
+        }
+
+        /// <summary>
+        /// Returns a string containing no spaces which, if passed to the Formula
+        /// constructor, will produce a Formula f such that this.Equals(f).  All of the
+        /// variables in the string should be normalized.
+        /// 
+        /// For example, if N is a method that converts all the letters in a string to upper case:
+        /// 
+        /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
+        /// new Formula("x + Y").ToString() should return "x+Y"
+        /// </summary>
+        public override string ToString()
+        {
+            string formula = "";
+            for (int i = 0; i < stringFormula.Count(); i++)
+            {
+                formula += stringFormula[i];
             }
-
-
+            return formula;
+        }
 
 
         /// <summary>
@@ -471,6 +557,8 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
+    public delegate string Normalizer(string s);
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
@@ -518,5 +606,4 @@ namespace Formulas
         }
     }
 }
-
 
