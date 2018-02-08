@@ -938,7 +938,214 @@ namespace GradingTests
             {
                 StressTest15();
             }
-        }
-    }
-}
 
+            /// <summary>
+            /// This tests makes sure that changes made to the cloned graph 
+            /// does not change the state of the original graph.
+            /// </summary>
+            [TestMethod()]
+            public void DependencyConstructor1()
+            {
+                String x = "x";
+                String y = "y";
+                String z = "z";
+                DependencyGraph graph = new DependencyGraph();
+
+                graph.AddDependency(x, y);
+
+                DependencyGraph graphClone = new DependencyGraph(graph);
+
+                graphClone.AddDependency(z, x);
+
+                Assert.IsFalse(graph.HasDependents(z));
+                Assert.IsTrue(graph.HasDependents(x));
+            }
+            /// <summary>
+            /// check the null exeption is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void DependencyConstructorNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                graph = null;
+
+                DependencyGraph graphClone = new DependencyGraph(graph);
+
+
+            }
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void HasDependeesNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+
+                graph.HasDependees(x);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void HasDependentsNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+
+                graph.HasDependents(x);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void GetDependeesNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+
+                graph.GetDependees(x);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void GetDependentsNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+
+                graph.GetDependents(x);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void RemoveDependencyNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+                String y = null;
+
+                graph.RemoveDependency(x, y);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void ReplaceDependentsNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+                HashSet<string> hey = new HashSet<string>();
+
+                graph.ReplaceDependents(x, hey);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void ReplaceDependeesNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+                HashSet<string> hey = new HashSet<string>();
+
+                graph.ReplaceDependees(x, hey);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void ReplaceDependentsNull2()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = "x";
+                HashSet<string> hey = new HashSet<string>();
+                hey.Add(null);
+                
+
+                graph.ReplaceDependents(x, hey);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void ReplaceDependeesNull2()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = "x";
+                HashSet<string> hey = new HashSet<string>();
+                hey.Add(null);
+               
+
+                graph.ReplaceDependees(x, hey);
+
+
+            }
+
+            /// <summary>
+            /// check that null excpetion is thrown
+            /// </summary>
+            [TestMethod()]
+            [ExpectedException(typeof(ArgumentNullException))]
+            public void AddDependencyNull()
+            {
+                DependencyGraph graph = new DependencyGraph();
+
+                String x = null;
+                String y = null;
+
+                graph.AddDependency(x, y);
+
+
+            }
+        }
+
+    }
+
+}

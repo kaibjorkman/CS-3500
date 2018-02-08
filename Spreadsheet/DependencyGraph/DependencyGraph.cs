@@ -80,13 +80,17 @@ namespace Dependencies
         /// <param name="graph"></param>
         public DependencyGraph(DependencyGraph graph)
         {
-            dependentsMap = new Dictionary<string, HashSet<string>>();
-            dependeesMap = new Dictionary<string, HashSet<string>>();
+            if(graph == null)
+            {
+                throw new ArgumentNullException("Parameter is Null");
+            }
+            //make a copy of the dictionaries
+            dependentsMap = new Dictionary<string, HashSet<string>>(graph.dependentsMap);
+            dependeesMap = new Dictionary<string, HashSet<string>>(graph.dependeesMap);
 
-            graphSize = 0;
+            int size = graph.Size;
+            
 
-            graph.dependeesMap = dependeesMap;
-            graph.dependentsMap = dependentsMap;
         }
 
         /// <summary>
