@@ -17,6 +17,7 @@ namespace SS
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestMethod1()
         {
+
             String empty = null;
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents("A1", empty);
