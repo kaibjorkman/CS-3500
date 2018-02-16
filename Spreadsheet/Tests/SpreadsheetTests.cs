@@ -11,7 +11,7 @@ namespace SS
     public class SpreadsheetTests
     {
         /// <summary>
-        /// Tests null exception for all three SetCellContents methods (string)
+        /// Tests null exception
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -23,7 +23,7 @@ namespace SS
         }
 
         /// <summary>
-        /// Tests null name exception for all three SetCellContents method (string)
+        /// Tests null exception
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
@@ -34,19 +34,19 @@ namespace SS
         }
 
         /// <summary>
-        /// Tests invalid name exception for all three SetCellContents method (string)
+        /// Tests invalid name exception  for SetCellContents method
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("4356", "string");
+            sheet.SetCellContents("8", "string");
 
         }
 
         /// <summary>
-        /// Tests null name exception for all three GetCellContents methods
+        /// Tests null name exception for GetCellContents method
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
@@ -58,86 +58,115 @@ namespace SS
         }
 
         /// <summary>
-        /// Tests invalid name exception for all three GetCellContents methods
+        /// Tests invalid name exception for GetCellContents method
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod5()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.GetCellContents("45345");
+            sheet.GetCellContents("878");
 
         }
 
         /// <summary>
-        /// Tests null name exception for all three SetCellContents method (Formula)
+        /// Tests null name exception for SetCellContents method 
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod7()
         {
-            Formula test = new Formula("1 + 1");
+            Formula test = new Formula("8 + 8");
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents(null, test);
         }
 
         /// <summary>
-        /// Tests invalid name exception for all three SetCellContents method (Formula)
+        /// Tests invalid name exception for SetCellContents method \
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod8()
         {
-            Formula test = new Formula("1 + 1");
+            Formula test = new Formula("8 - 1");
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("4356", test);
+            sheet.SetCellContents("48896", test);
         }
 
         /// <summary>
-        /// Tests null name exception for all three SetCellContents method (double)
+        /// Tests null name exception for etCellContents method 
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod9()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents(null, 42);
+            sheet.SetCellContents(null, 40);
         }
 
         /// <summary>
-        /// Tests invalid name exception for all three SetCellContents method (double)
+        /// Tests the GetNamesOfAllNoneEmptyCells
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod10()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("4356", 42);
+            sheet.SetCellContents("kai", 50);
+           
+            
+            
+
 
         }
 
         /// <summary>
-        /// Tests null arg exception for GetDirectDependents
+        /// Tests the GetNamesOfAllNoneemptyCells
+        /// </summary>
+        [TestMethod]
+        public void TestMethod11()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetCellContents("A1", 50);
+            IEnumerable<string> set = sheet.GetNamesOfAllNonemptyCells();
+            foreach(string element in set)
+            {
+                Assert.AreSame(element, "A1");
+            }
+
+        }
+
+        /// <summary>
+        /// Tests the null formula in SetCellContents
         /// </summary>
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void TestMethod12()
         {
-            PrivateObject accessor = new PrivateObject(new Spreadsheet());
-            accessor.Invoke("GetDirectDependents", new Object[] { null });
-
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            Formula first = new Formula();
+            sheet.SetCellContents("A1", first);
         }
 
         /// <summary>
-        /// Tests null arg exception for GetDirectDependents
+        /// Tests the replacement when SetCellCOntents is called
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(InvalidNameException))]
         public void TestMethod13()
         {
-            PrivateObject accessor = new PrivateObject(new Spreadsheet());
-            accessor.Invoke("GetDirectDependents", new Object[] { "4353" });
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            Formula first = new Formula("2 + 2");
+            Formula second = new Formula("3 + 3");
+            sheet.SetCellContents("A1", first);
+            sheet.SetCellContents("A1", second);
+            Assert.AreEqual(sheet.GetCellContents("A1"), second);
+
+
+
         }
+
+
+
 
         /// <summary>
         /// Tests for CircularException 
@@ -189,7 +218,7 @@ namespace SS
         }
 
         /// <summary>
-        /// Tests for SetCellContents (Formula)
+        /// Tests for SetCellContents
         /// </summary>
         [TestMethod]
         public void TestMethod17()
@@ -198,19 +227,19 @@ namespace SS
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents("A1", f1);
             object value = sheet.GetCellContents("A1");
-            Assert.AreEqual(new Formula("C1 + B1"), value);
+            Assert.AreEqual(f1, value);
         }
 
         /// <summary>
-        /// Tests for SetCellContents (double)
+        /// Tests for SetCellContents 
         /// </summary>
         [TestMethod]
         public void TestMethod18()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("A1", 42);
+            sheet.SetCellContents("A1", 10.0);
             object value = sheet.GetCellContents("A1");
-            Assert.AreEqual(42.0, value);
+            Assert.AreEqual(10.0, value);
         }
 
         /// <summary>
@@ -243,48 +272,37 @@ namespace SS
         [TestMethod]
         public void TestMethod21()
         {
-            Formula f1 = new Formula("c1 + b1", x => x.ToUpper(), x => true);
+            Formula f1 = new Formula("c1 + b1");
             AbstractSpreadsheet sheet = new Spreadsheet();
             sheet.SetCellContents("A1", f1);
             object value = sheet.GetCellContents("A1");
-            Assert.AreEqual(new Formula("C1 + B1"), value);
+            Assert.AreEqual(f1 , value);
         }
 
         /// <summary>
-        /// Tests for replacing contents of a cell
+        /// Tests for SetCellContents (number)
         /// </summary>
         [TestMethod]
         public void TestMethod22()
         {
-            Formula f1 = new Formula("c1 + b1", x => x.ToUpper(), x => true);
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("A1", f1);
-            sheet.SetCellContents("A1", 42);
-            sheet.SetCellContents("A1", f1);
-            sheet.SetCellContents("A1", "Hello World");
-            HashSet<string> s1 = new HashSet<string>(sheet.GetNamesOfAllNonemptyCells());
-            HashSet<string> s2 = new HashSet<string>();
-            s2.Add("A1");
-            Assert.AreEqual(s2.Count, s1.Count);
+            sheet.SetCellContents("A1", 10.0);
+            sheet.SetCellContents("A1", 11.0);
+            Assert.AreEqual(sheet.GetCellContents("A1"), 11.0);
         }
 
         /// <summary>
-        /// Tests for replacing contents of a cell
+        /// Tests for SetCellContents (string)
         /// </summary>
         [TestMethod]
         public void TestMethod23()
         {
-            Formula f1 = new Formula("c1 + b1", x => x.ToUpper(), x => true);
             AbstractSpreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("A1", "");
-            sheet.SetCellContents("B1", 42);
-            sheet.SetCellContents("C1", "Hello World");
-            HashSet<string> s1 = new HashSet<string>(sheet.GetNamesOfAllNonemptyCells());
-            HashSet<string> s2 = new HashSet<string>();
-            s2.Add("B1");
-            s2.Add("C1");
-            Assert.AreEqual(s2.Count, s1.Count);
+            sheet.SetCellContents("A1", "kai");
+            sheet.SetCellContents("A1", "new");
+            Assert.AreEqual(sheet.GetCellContents("A1"), "new");
         }
+
 
     }
 }
