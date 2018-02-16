@@ -10,7 +10,7 @@ using Formulas;
 namespace SS
 {
    
-    class Spreadsheet : AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
         // dictionary maps cell name (row, col) to the cell itself
         Dictionary<string, Cell> cells;
@@ -86,8 +86,9 @@ namespace SS
                 cells[name] = cell;
             }                           // replace the key with the new value
             else
+            {
                 cells.Add(name, cell);      // otherwise add a new key for that value
-
+            }
             // replace the dependents of 'name' in the dependency graph with an empty hash set
             graph.ReplaceDependees(name, new HashSet<String>());
 
@@ -134,10 +135,10 @@ namespace SS
                 cells.Add(name, cell);      // otherwise add a new key for that value
             }
             
-            // replace the dependents of 'name' in the dependency graph with an empty hash set
+            // replace the dependents of 'name' in the dependency graph with an empty hash set to make room for recalculation
             graph.ReplaceDependees(name, new HashSet<String>());
 
-            // recalculate at end
+            // recalculate cells
             HashSet<String> all_dependees = new HashSet<String>(GetCellsToRecalculate(name));
             return all_dependees;
         }
@@ -231,10 +232,8 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            if(cells.ContainsKey(name))
-            {
-                return graph.GetDependents(name);
-            }
+                return graph.GetDependents(name); //get the dependents from corrisponding name
+            
                 
         }
 
@@ -258,9 +257,6 @@ namespace SS
             public Object contents { get; private set; }
             public Object value { get; private set; }
 
-            string contents_type;
-            string value_type;
-
             /// <summary>
             /// Constructor for strings
             /// </summary>
@@ -268,8 +264,6 @@ namespace SS
             {
                 contents = name;
                 value = name;
-                contents_type = "string";
-                value_type = contents_type;
             }
 
             /// <summary>
@@ -279,8 +273,6 @@ namespace SS
             {
                 contents = name;
                 value = name;
-                contents_type = "double";
-                value_type = contents_type;
             }
 
             /// <summary>
@@ -290,8 +282,6 @@ namespace SS
             {
                 contents = name;
                 //value = name.Evaluate();
-                contents_type = "Formula";
-                //value_type = value.GetType();
             }
 
         } // Cell class
