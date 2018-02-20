@@ -59,6 +59,15 @@
     <Content Include="Dependencies\Formula.dll" />
     <Content Include="Dependencies\Formula.pdb" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Spreadsheet.xsd">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SampleSavedSpreadsheet.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
