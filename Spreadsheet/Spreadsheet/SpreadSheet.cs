@@ -58,8 +58,19 @@ namespace SS
         /// </summary>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            return cells.Keys;
+            HashSet<string> nonEmpties = new HashSet<string>();
+
+            foreach(KeyValuePair<string, Cell> pair in cells)
+            {
+                if(pair.Value.CheckCellContents())
+                {
+                    nonEmpties.Add(pair.Key);
+                }
+            }
+            
+            return nonEmpties;
         }
+        
 
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
@@ -282,6 +293,24 @@ namespace SS
             {
                 contents = name;
                 //value = name.Evaluate();
+            }
+
+            /// <summary>
+            /// Checks if the content n the cell is an empty string
+            /// </summary>
+            /// <param name="name"></param>
+            /// <returns></returns>
+            public bool CheckCellContents()
+            {
+                if (contents.Equals(""))
+                {
+                    return false;
+                }
+
+                else
+                {
+                    return true;
+                }
             }
 
         } // Cell class
