@@ -156,7 +156,7 @@ namespace SS
                                 {
                                     oldIsValid = new Regex(reader["IsValid"]); //set the old is valid statement for checking later
                                 }
-                                catch
+                                catch(ArgumentException)
                                 {
                                     throw new SpreadsheetReadException("Not a valid Regex Expression");
                                 }
